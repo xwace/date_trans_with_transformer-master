@@ -172,7 +172,13 @@ class Encoder(torch.nn.Module):
 def get_subsequent_mask(seq):
     seq_len = seq.shape[1]
     ones = torch.ones((seq_len, seq_len), dtype=torch.int, device=seq.device)
-    mask = 1 - torch.triu(ones, diagonal=1)
+
+    m = ones.numpy()#wxw 把triu算子改成手动赋值的方式实现
+    for i in range(1,m.shape[0]+1):
+        m[i-1,i:] = 0
+    mask = torch.tensor(m)
+
+    # mask = 1 - torch.triu(ones, diagonal=1)
     # print(mask)
     return mask
 

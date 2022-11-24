@@ -5,6 +5,7 @@ import onnx
 import onnxsim
 import torch
 import numpy as np
+import visdom
 from tqdm import tqdm
 from functools import partial
 from dataset import Dataset, transform, collate_fn
@@ -81,27 +82,25 @@ def main(gpu_id=None):
         train(model, loss_fn, optimizer, dataloader, epoch, use_gpu=True if gpu_id is not None else False)
 
 if __name__ == '__main__':
-    # if len(sys.argv) == 1:
-    #     main(gpu_id=None)
-    # else:
-    #     main(gpu_id='0')
+    if len(sys.argv) == 1:
+        main(gpu_id=None)
+    else:
+        main(gpu_id='0')
 
-    model_dict = torch.load("/home/star/Desktop/date_trans_with_transformer-master/checkpoint/ckpt_epoch_18.pth",map_location=torch.device('cpu'))
-    model = Transformer(n_head=2)
-    model.load_state_dict(model_dict,strict=False)
-    model.eval()
-    out = model(torch.rand(1,21,37),torch.rand(1,11,12))
-    print(out.shape)
+    # model_dict = torch.load("/home/star/Desktop/date_trans_with_transformer-master/checkpoint/ckpt_epoch_18.pth",map_location=torch.device('cpu'))
+    # model = Transformer(n_head=2)
+    # model.load_state_dict(model_dict,strict=False)
+    # model.eval()
+    # out = model(torch.rand(1,21,37).cpu(),torch.rand(1,11,12))
 
-    torch.onnx.export(model,(torch.rand(1,21,37),torch.rand(1,11,12)),"dataNet.onnx",input_names=["x1","x2"],output_names=["out"],opset_version=11)
-    mod = onnx.load("dataNet.onnx")
-    sim_mod,_ = onnxsim.simplify(mod)
-    onnx.save(sim_mod,"dataNet.onnx")
-    input()
+    # torch.onnx.export(model,(torch.rand(1,21,37),torch.rand(1,11,12)),"dataNet.onnx",input_names=["x1","x2"],output_names=["out"],opset_version=10)
+    # mod = onnx.load("dataNet.onnx")
+    # sim_mod,_ = onnxsim.simplify(mod)
+    # onnx.save(sim_mod,"dataNet.onnx")
 
     import onnxruntime
-    session = onnxruntime.InferenceSession("dataNet.onnx")
+    session = onnxruntime.InferenceSession("dataNet.onnx",use_gpu=False)
     inputName1 = session.get_inputs()[0].name
     inputName2 = session.get_inputs()[1].name
-    result = session.run(None,{inputName1:np.random.rand(1,21,37),inputName2:np.random.rand(1,11,12)})
+    result = session.run(None,{inputName1:np.random.rand(1,21,37).astype(np.float32),inputName2:np.random.rand(1,11,12).astype(np.float32)})
     print("result",result)
