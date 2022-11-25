@@ -14,7 +14,7 @@ class PositionalEncoding(torch.nn.Module):
         # TODO: make it with torch instead of numpy
 
         def get_position_angle_vec(position):
-            return [position / np.power(10000, 2 * (hid_j // 2) / out_dim) for hid_j in range(out_dim)]
+            return [position / np.power (10000, 2 * (hid_j//2) / out_dim) for hid_j in range(out_dim)]#torch.floor_divide(hid_j, 2)
 
         sinusoid_table = np.array([get_position_angle_vec(pos_i) for pos_i in range(n_position)])
         sinusoid_table[:, 0::2] = np.sin(sinusoid_table[:, 0::2])  # dim 2i
@@ -209,7 +209,7 @@ class Decoder(torch.nn.Module):
 
         residual = outputs
         outputs, scores = self.multi_head_attention_1_2(outputs, enc_outputs, enc_outputs)
-        self.scores_for_paint = scores.detach().cpu().numpy() #解码时每次会多次赋值，用最后的
+        # self.scores_for_paint = scores.detach().cpu().numpy() #解码时每次会多次赋值，用最后的
         outputs = self.layer_norm_1_2(outputs + residual)
 
         residual = outputs

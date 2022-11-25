@@ -111,9 +111,6 @@ class Dataset(torch.utils.data.Dataset):
         '''
         self.inv_machine_vocab = dict(enumerate(sorted(self.machine_vocab) + ['<pad>']))
         self.machine_vocab = {v:k for k, v in self.inv_machine_vocab.items()}
-        # print(self.human_vocab)
-        # print(self.machine_vocab)
-        # print(self.inv_machine_vocab)
 
     def __getitem__(self, idx):
         human_readable, machine_readable = self.dataset[idx] #dataset is a list of tuples
